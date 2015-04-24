@@ -238,6 +238,7 @@ public class AuctionServiceTests
     assertTrue("ts1 enabled", timeslotRepo.isTimeslotEnabled(ts1));
     assertTrue("next timeslot valid", svc.validateOrder(good));
 
+    // order with bad SN
     Order bogus = new Order(b1, ts0.getSerialNumber(), 1.0, -22.0);
     assertFalse("ts0 not enabled", timeslotRepo.isTimeslotEnabled(ts0));
     assertFalse("current timeslot not valid", svc.validateOrder(bogus));
@@ -246,11 +247,18 @@ public class AuctionServiceTests
     assertNotNull("status got sent", status);
     assertEquals("correct broker", b1, status.getBroker());
     assertEquals("correct order", bogus.getId(), status.getOrderId());
-    
+
+    // order with bad qty
     Order smallSell = new Order(b1, ts1.getSerialNumber(), 0.09, -22.0);
     assertFalse("too small buy", svc.validateOrder(smallSell));
     Order smallBuy = new Order(b1, ts1.getSerialNumber(), -0.08, 22.0);
     assertFalse("too small buy", svc.validateOrder(smallBuy));
+
+    // Order with NAN values
+    bogus = new Order (b1, ts1.getSerialNumber(), Double.NaN, -450.0);
+    assertFalse("bad qty", svc.validateOrder(bogus));
+    bogus= new Order (b1, ts1.getSerialNumber(), -50.0, Double.NaN);
+    assertFalse("bad qty", svc.validateOrder(bogus));
   }
 
   // one ask, one bid, equal qty, tradeable

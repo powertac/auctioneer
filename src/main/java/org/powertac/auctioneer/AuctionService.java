@@ -178,7 +178,15 @@ public class AuctionService
           + " with invalid quantity " + order.getMWh());
       return false;
     }
-    
+    if ((null != order.getLimitPrice())
+        && (order.getLimitPrice().equals(Double.NaN)
+            || order.getLimitPrice().equals(Double.POSITIVE_INFINITY)
+            || order.getLimitPrice().equals(Double.NEGATIVE_INFINITY))) {
+      log.warn("Order from " + order.getBroker().getUsername()
+          + " with invalid price " + order.getLimitPrice());
+      return false;
+    }
+
     double minQuantity = Competition.currentCompetition().getMinimumOrderQuantity();
     if (Math.abs(order.getMWh()) < minQuantity) {
       log.warn("Order from " + order.getBroker().getUsername()
